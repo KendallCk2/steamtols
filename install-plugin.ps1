@@ -91,9 +91,26 @@ Write-Step "Instalando plugin..."
 if (Test-Path $pluginDir) {
     Remove-Item -Recurse -Force $pluginDir
 }
-New-Item -ItemType Directory -Path $pluginDir -Force | Out-Null
-Expand-Archive -Path $tmpZip -DestinationPath $pluginDir -Force
+
+$tmpExtract = "$env:TEMP\luatools_extract"
+if (Test-Path $tmpExtract) { Remove-Item -Recurse -Force $tmpExtract }
+New-Item -ItemType Directory -Path $tmpExtract -Force | Out-Null
+
+Expand-Archive -Path $tmpZip -DestinationPath $tmpExtract -Force
 Remove-Item $tmpZip -Force
+
+# Se o zip criou uma subpasta, entra nela
+$extracted = Get-ChildItem -Path $tmpExtract
+if ($extracted.Count -eq 1 -and $extracted[0].PSIsContainer) {
+    $sourceDir = $extracted[0].FullName
+} else {
+    $sourceDir = $tmpExtract
+}
+
+# Move para o destino final
+New-Item -ItemType Directory -Path $pluginDir -Force | Out-Null
+Get-ChildItem -Path $sourceDir | Move-Item -Destination $pluginDir -Force
+Remove-Item -Recurse -Force $tmpExtract
 
 if (-not (Test-Path "$pluginDir\plugin.json")) {
     Write-Fail "Instalacao incompleta - plugin.json nao encontrado."
