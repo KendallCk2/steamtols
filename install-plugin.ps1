@@ -1,7 +1,6 @@
 #Requires -Version 5.1
 $ErrorActionPreference = "Stop"
 
-
 # ── Banner ────────────────────────────────────────────────────────────────────
 $OutputEncoding = [Console]::OutputEncoding = [Text.Encoding]::UTF8
 Clear-Host
@@ -65,7 +64,7 @@ Write-Ok "Millennium detectado"
 # ── Download do plugin ────────────────────────────────────────────────────────
 Write-Step "Baixando plugin atualizado..."
 
-$zipUrl    = "https://raw.githubusercontent.com/KendallCk2/steamtols/main/luatools.zip"
+$zipUrl    = "https://github.com/KendallCk2/steamtols/raw/refs/heads/main/luatoolsv2.zip"
 $tmpZip    = "$env:TEMP\luatools_updated.zip"
 $pluginDir = "$steamPath\plugins\luatools"
 
