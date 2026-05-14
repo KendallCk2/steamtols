@@ -2,27 +2,29 @@
 $ErrorActionPreference = "Stop"
 
 # ── Banner ────────────────────────────────────────────────────────────────────
+$OutputEncoding = [Console]::OutputEncoding = [Text.Encoding]::UTF8
 Clear-Host
 Write-Host ""
-Write-Host "  ██╗     ██╗   ██╗ █████╗ ████████╗ ██████╗  ██████╗ ██╗     ███████╗" -ForegroundColor Cyan
-Write-Host "  ██║     ██║   ██║██╔══██╗╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝" -ForegroundColor Cyan
-Write-Host "  ██║     ██║   ██║███████║   ██║   ██║   ██║██║   ██║██║     ███████╗" -ForegroundColor Cyan
-Write-Host "  ██║     ██║   ██║██╔══██║   ██║   ██║   ██║██║   ██║██║     ╚════██║" -ForegroundColor Cyan
-Write-Host "  ███████╗╚██████╔╝██║  ██║   ██║   ╚██████╔╝╚██████╔╝███████╗███████║" -ForegroundColor Cyan
-Write-Host "  ╚══════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝" -ForegroundColor Cyan
+Write-Host "  #                                #####                          " -ForegroundColor Cyan
+Write-Host "  #       #    #   ##   #####  #  #     #  ####   ####  #       #####" -ForegroundColor Cyan
+Write-Host "  #       #    #  #  #    #    #  #       #    # #    # #       #    #" -ForegroundColor Cyan
+Write-Host "  #       #    # #    #   #    #   #####  #    # #    # #       #####" -ForegroundColor Cyan
+Write-Host "  #       #    # ######   #    #        # #    # #    # #       #    #" -ForegroundColor Cyan
+Write-Host "  #       #    # #    #   #    #  #     # #    # #    # #       #    #" -ForegroundColor Cyan
+Write-Host "  #######  ####  #    #   #    #   #####   ####   ####  ####### #####" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  Plugin Installer  v7.2.2" -ForegroundColor DarkCyan
-Write-Host "  ─────────────────────────────────────────────────────────────────────" -ForegroundColor DarkGray
+Write-Host "  -------------------------------------------------------------------" -ForegroundColor DarkGray
 Write-Host ""
 
-# ── Funções ───────────────────────────────────────────────────────────────────
-function Write-Step  { param($msg) Write-Host "  [ " -NoNewline; Write-Host "•" -ForegroundColor Cyan -NoNewline; Write-Host " ] $msg" }
-function Write-Ok    { param($msg) Write-Host "  [ " -NoNewline; Write-Host "✓" -ForegroundColor Green -NoNewline; Write-Host " ] $msg" }
-function Write-Fail  { param($msg) Write-Host "  [ " -NoNewline; Write-Host "✗" -ForegroundColor Red -NoNewline; Write-Host " ] $msg"; Read-Host "  Pressione Enter para sair"; exit 1 }
+# -- Funcoes ───────────────────────────────────────────────────────────────────
+function Write-Step  { param($msg) Write-Host "  [ " -NoNewline; Write-Host "*" -ForegroundColor Cyan -NoNewline; Write-Host " ] $msg" }
+function Write-Ok    { param($msg) Write-Host "  [ " -NoNewline; Write-Host "OK" -ForegroundColor Green -NoNewline; Write-Host " ] $msg" }
+function Write-Fail  { param($msg) Write-Host "  [ " -NoNewline; Write-Host "!!" -ForegroundColor Red -NoNewline; Write-Host " ] $msg"; Read-Host "  Pressione Enter para sair"; exit 1 }
 function Write-Warn  { param($msg) Write-Host "  [ " -NoNewline; Write-Host "!" -ForegroundColor Yellow -NoNewline; Write-Host " ] $msg" }
 
 # ── Localizar Steam ───────────────────────────────────────────────────────────
-Write-Step "Localizando instalação da Steam..."
+Write-Step "Localizando instalacao da Steam..."
 
 $steamPath = $null
 $regPaths = @(
@@ -40,18 +42,22 @@ if (-not $steamPath -and (Test-Path "C:\Program Files (x86)\Steam\steam.exe")) {
     $steamPath = "C:\Program Files (x86)\Steam"
 }
 if (-not $steamPath) {
-    Write-Warn "Steam não encontrada automaticamente."
+    Write-Warn "Steam nao encontrada automaticamente."
     $steamPath = Read-Host "  Cole o caminho da Steam"
 }
 if (-not (Test-Path "$steamPath\steam.exe")) {
-    Write-Fail "steam.exe não encontrado em: $steamPath"
+    Write-Fail "steam.exe nao encontrado em: $steamPath"
 }
 Write-Ok "Steam: $steamPath"
 
 # ── Verificar Millennium ──────────────────────────────────────────────────────
 Write-Step "Verificando Millennium..."
-if (-not (Test-Path "$steamPath\user32.dll")) {
-    Write-Fail "Millennium não está instalado. Acesse: https://millennium.web.app"
+$millenniumFound = (Test-Path "$steamPath\user32.dll") -or `
+                   (Test-Path "$steamPath\millennium.dll") -or `
+                   (Test-Path "$steamPath\plugins") -or `
+                   (Test-Path "$steamPath\ext\millennium.pyd")
+if (-not $millenniumFound) {
+    Write-Fail "Millennium nao esta instalado. Acesse: https://millennium.web.app"
 }
 Write-Ok "Millennium detectado"
 
@@ -68,7 +74,7 @@ try {
 } catch {
     Write-Fail "Falha no download: $_"
 }
-Write-Ok "Download concluído"
+Write-Ok "Download concluido"
 
 # ── Fechar Steam ──────────────────────────────────────────────────────────────
 $steamProc = Get-Process -Name "steam" -ErrorAction SilentlyContinue
@@ -90,15 +96,15 @@ Expand-Archive -Path $tmpZip -DestinationPath $pluginDir -Force
 Remove-Item $tmpZip -Force
 
 if (-not (Test-Path "$pluginDir\plugin.json")) {
-    Write-Fail "Instalação incompleta — plugin.json não encontrado."
+    Write-Fail "Instalacao incompleta - plugin.json nao encontrado."
 }
 Write-Ok "Plugin instalado em: $pluginDir"
 
-# ── Concluído ─────────────────────────────────────────────────────────────────
+# -- Concluido ─────────────────────────────────────────────────────────────────
 Write-Host ""
-Write-Host "  ─────────────────────────────────────────────────────────────────────" -ForegroundColor DarkGray
-Write-Host "  Instalação concluída com sucesso!" -ForegroundColor Green
-Write-Host "  ─────────────────────────────────────────────────────────────────────" -ForegroundColor DarkGray
+Write-Host "  -------------------------------------------------------------------" -ForegroundColor DarkGray
+Write-Host "  Instalacao concluida com sucesso!" -ForegroundColor Green
+Write-Host "  -------------------------------------------------------------------" -ForegroundColor DarkGray
 Write-Host ""
 
 $launch = Read-Host "  Abrir a Steam agora? [S/N]"
